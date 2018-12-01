@@ -1,20 +1,14 @@
 import java.io.File
 
 fun main(args: Array<String>) {
-    val lines = File("src/main/resources/input.txt").inputStream().bufferedReader().readLines()
-    val numbers = lines.map(Integer::parseInt)
+    val numbers = frequencyChanges().iterator()
 
     var currentFrequency = 0
     val pastFrequencies = mutableSetOf(currentFrequency)
     var repeatedFrequency: Int? = null
-    var index = 0
 
     while (repeatedFrequency == null) {
-        if (index >= numbers.size) {
-            index = 0
-        }
-
-        val number = numbers[index]
+        val number = numbers.next()
 
         val nextFrequency = currentFrequency + number
         val added = pastFrequencies.add(nextFrequency)
@@ -23,9 +17,24 @@ fun main(args: Array<String>) {
         if (!added) {
             repeatedFrequency = nextFrequency
         }
-
-        index += 1
     }
 
     println(repeatedFrequency)
+}
+
+fun frequencyChanges(): Sequence<Int> {
+    val lines = File("src/main/resources/input.txt").inputStream().bufferedReader().readLines()
+    return lines.map(Integer::parseInt).toCycle()
+}
+
+fun <T : Any> List<T>.toCycle (): Sequence<T> {
+    var index = -1
+
+    return generateSequence {
+        if (index + 1 >= this.size) {
+            index = -1
+        }
+        index += 1
+        this[index]
+    }
 }
