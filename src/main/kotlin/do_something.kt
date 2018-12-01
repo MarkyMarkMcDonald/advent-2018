@@ -1,25 +1,20 @@
 import java.io.File
+import kotlin.system.exitProcess
 
 fun main(args: Array<String>) {
-    val numbers = frequencyChanges().iterator()
+    val pastFrequencies = mutableSetOf(0)
 
-    var currentFrequency = 0
-    val pastFrequencies = mutableSetOf(currentFrequency)
-    var repeatedFrequency: Int? = null
+    frequencyChanges().reduce { currentFrequency, change ->
+        val nextFrequency = currentFrequency + change
 
-    while (repeatedFrequency == null) {
-        val number = numbers.next()
-
-        val nextFrequency = currentFrequency + number
-        val added = pastFrequencies.add(nextFrequency)
-        currentFrequency = nextFrequency
-
-        if (!added) {
-            repeatedFrequency = nextFrequency
+        val unique = pastFrequencies.add(nextFrequency)
+        if (!unique) {
+            println(nextFrequency)
+            exitProcess(0)
         }
-    }
 
-    println(repeatedFrequency)
+        nextFrequency
+    }
 }
 
 fun frequencyChanges(): Sequence<Int> {
@@ -27,7 +22,7 @@ fun frequencyChanges(): Sequence<Int> {
     return lines.map(Integer::parseInt).toCycle()
 }
 
-fun <T : Any> List<T>.toCycle (): Sequence<T> {
+fun <T : Any> List<T>.toCycle(): Sequence<T> {
     var index = -1
 
     return generateSequence {
