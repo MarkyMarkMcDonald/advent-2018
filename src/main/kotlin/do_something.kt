@@ -1,35 +1,20 @@
 import java.io.File
-import kotlin.system.exitProcess
 
 fun main(args: Array<String>) {
-    val pastFrequencies = mutableSetOf(0)
-
-    frequencyChanges().reduce { currentFrequency, change ->
-        val nextFrequency = currentFrequency + change
-
-        val unique = pastFrequencies.add(nextFrequency)
-        if (!unique) {
-            println(nextFrequency)
-            exitProcess(0)
-        }
-
-        nextFrequency
-    }
+    val twoErs = lines().filter(::twoEr).size
+    val threeErs = lines().filter(::threeEr).size
+    val checksum = twoErs * threeErs
+    println(checksum)
 }
 
-fun frequencyChanges(): Sequence<Int> {
-    val lines = File("src/main/resources/input.txt").inputStream().bufferedReader().readLines()
-    return lines.map(Integer::parseInt).toCycle()
+fun twoEr(boxId: String): Boolean {
+    val charCounts: Map<Char, Int> = boxId.toCharArray().groupBy { it }.mapValues { it.value.size }
+    return charCounts.values.any { it == 2 }
 }
 
-fun <T : Any> List<T>.toCycle(): Sequence<T> {
-    var index = -1
-
-    return generateSequence {
-        if (index + 1 >= this.size) {
-            index = -1
-        }
-        index += 1
-        this[index]
-    }
+fun threeEr(boxId: String): Boolean {
+    val charCounts: Map<Char, Int> = boxId.toCharArray().groupBy { it }.mapValues { it.value.size }
+    return charCounts.values.any { it == 3 }
 }
+
+fun lines() : List<String> = File("src/main/resources/input.txt").inputStream().bufferedReader().readLines()
