@@ -1,20 +1,25 @@
 import java.io.File
 
 fun main(args: Array<String>) {
-    val twoErs = lines().filter(::twoEr).size
-    val threeErs = lines().filter(::threeEr).size
-    val checksum = twoErs * threeErs
-    println(checksum)
+    val lines = input()
+    val offByOnes = lines.map { line -> offByOnes(lines, line) }.find { it != null }
+    offByOnes!!
+
+    val samesies = offByOnes.first.zip(offByOnes.second).filter { it.first == it.second }.map { it.first }.joinToString("")
+
+    println(offByOnes.first)
+    println(offByOnes.second)
+    println(samesies)
 }
 
-fun twoEr(boxId: String): Boolean {
-    val charCounts: Map<Char, Int> = boxId.toCharArray().groupBy { it }.mapValues { it.value.size }
-    return charCounts.values.any { it == 2 }
+fun offByOnes(lines: List<String>, line: String): Pair<String, String>? {
+    val otherLine = lines.find { otherLine -> isOffByOne(line, otherLine) }
+    if (otherLine != null) {
+        return Pair(line, otherLine)
+    }
+    return null
 }
 
-fun threeEr(boxId: String): Boolean {
-    val charCounts: Map<Char, Int> = boxId.toCharArray().groupBy { it }.mapValues { it.value.size }
-    return charCounts.values.any { it == 3 }
-}
+fun isOffByOne(a: String, b: String): Boolean = a.zip(b).count { it.first != it.second } == 1
 
-fun lines() : List<String> = File("src/main/resources/input.txt").inputStream().bufferedReader().readLines()
+fun input(): List<String> = File("src/main/resources/input.txt").inputStream().bufferedReader().readLines()
