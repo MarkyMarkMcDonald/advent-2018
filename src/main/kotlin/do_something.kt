@@ -3,12 +3,13 @@ fun main(args: Array<String>) {
 
     val claims = lines.map(::parseClaim)
 
-    val maxHeight = 1000
-    val maxWidth = 1000
+    val peaceful = claims.filter { claim ->
+        claims.none { otherClaim ->
+            claim.intersects(otherClaim) && otherClaim != claim
+        }
+    }
 
-    val overClaimedCount = points(maxHeight, maxWidth).count { point -> point.overClaimed(claims) }
-
-    println(overClaimedCount)
+    println(peaceful)
 }
 
 data class Claim(
@@ -19,9 +20,28 @@ data class Claim(
     val height: Int
 ) {
     fun contains(x: Int, y: Int) : Boolean {
-        val withinX = x >= widthOffset && x <= widthOffset + (width - 1)
-        val withinY = y >= heightOffset && y <= heightOffset + (height - 1)
+        val withinX = x >= leftEdge() && x <= rightEdge()
+        val withinY = y >= northEdge() && y <= southEdge()
         return withinX && withinY
+    }
+
+    fun leftEdge() = widthOffset
+
+    fun rightEdge() = widthOffset + (width - 1)
+
+    fun northEdge() = heightOffset
+
+    fun southEdge() = heightOffset + (height - 1)
+
+    fun intersects(claim: Claim) : Boolean {
+        val tooConservative = leftEdge() > claim.rightEdge()
+        val tooLiberal = rightEdge() < claim.leftEdge()
+        val tooHoly = southEdge() < claim.northEdge()
+        val tooEvil = northEdge() > claim.southEdge()
+
+        val lackOfIntersection = tooConservative || tooLiberal || tooHoly || tooEvil
+
+        return !lackOfIntersection
     }
 }
 
