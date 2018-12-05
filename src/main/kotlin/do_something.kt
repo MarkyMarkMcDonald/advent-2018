@@ -8,18 +8,31 @@ fun main(args: Array<String>) {
 
     val sleepySleeps = parseGuardSleepIntervals(actions)
 
-    val sleepyHead = findSleepyHead(sleepySleeps)
+    val guards = sleepySleeps.map(GuardSleepInterval::guard).distinct()
 
-    val sleepiestMinute = findSleepiestMinute(sleepyHead, sleepySleeps)
+    val snorer = guards.maxBy { guard -> findSleepiestMinute(guard, sleepySleeps).second }!!
 
-    println(sleepyHead)
-    println(sleepiestMinute)
+    val snoreTime = findSleepiestMinute(snorer, sleepySleeps)
+
+    println(snorer)
+    println(snoreTime.first)
+    println(snorer.toInt() * snoreTime.first)
 }
 
 typealias Minute = Int
 typealias Count = Int
 
-fun findSleepiestMinute(sleepyHead: String, sleepySleeps: List<GuardSleepInterval>): Int {
+fun findSleepiestMinute(sleepyHead: String, sleepySleeps: List<GuardSleepInterval>): Pair<Minute, Count> {
+    val minutes = minuteFrequencies(sleepySleeps, sleepyHead)
+
+    val (minute, count) = minutes.maxBy { it.value }!!
+    return Pair(minute, count)
+}
+
+private fun minuteFrequencies(
+    sleepySleeps: List<GuardSleepInterval>,
+    sleepyHead: String
+): MutableMap<Minute, Count> {
     val minutes = mutableMapOf<Minute, Count>()
     minutes.putAll(((0..60).map { Pair(it, 0) }))
 
@@ -30,8 +43,7 @@ fun findSleepiestMinute(sleepyHead: String, sleepySleeps: List<GuardSleepInterva
             minutes[minute] = minutes[minute]?.plus(1)!!
         }
     }
-
-    return minutes.maxBy { it.value }!!.key
+    return minutes
 }
 
 fun findSleepyHead(sleepySleeps: List<GuardSleepInterval>): String {
